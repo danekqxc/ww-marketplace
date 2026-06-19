@@ -1,7 +1,7 @@
 # WWM-place
 
 <p align="center">
-  <img src="img/logo.png" alt="WW Marketplace Logo" width="150" height="150">
+  <img src="images/logo.png" alt="WW Marketplace Logo" width="150" height="150">
 </p>
 
 ## О проекте
