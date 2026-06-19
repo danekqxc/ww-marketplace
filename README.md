@@ -10,7 +10,7 @@ WWM-place — WW(дабл-ю дабл-ю) M(market)place - биржа игров
 
 ---
 
-## 🛠 Технологический стек
+## Технологический стек
 
 <p align="left">
   <img src="https://skillicons.dev/icons?i=py,flask,sqlite,js,html,css&theme=dark" alt="Tech Stack" />
@@ -23,7 +23,7 @@ WWM-place — WW(дабл-ю дабл-ю) M(market)place - биржа игров
 
 ---
 
-## 🎮 Функционал
+##  Функционал
 
 Мы реализовали полноценный цикл работы торговой площадки от регистрации до завершения сделки:
 
