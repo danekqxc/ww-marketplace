@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход / Регистрация | WWM-place</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .auth-page { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%); }
+        .auth-container {
+            background: rgba(15, 15, 15, 0.95);
+            width: 100%;
+            max-width: 450px;
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid var(--border-gold);
+            box-shadow: 0 0 50px rgba(255, 179, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 0.5s ease;
+            box-sizing: border-box;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .auth-tabs { display: flex; gap: 25px; margin-bottom: 35px; border-bottom: 1px solid #222; }
+        .tab-btn { background: none; border: none; color: var(--text-muted); font-size: 1.1rem; font-weight: 700; padding: 10px 0; cursor: pointer; transition: 0.3s; position: relative; letter-spacing: 1px; }
+        .tab-btn.active { color: var(--gold); }
+        .tab-btn.active::after { content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 2px; background: var(--gold); box-shadow: 0 0 100px var(--gold); }
+        .auth-form { display: none; flex-direction: column; gap: 25px; }
+        .auth-form.active { display: flex; }
+        .form-group { display: flex; flex-direction: column; gap: 10px; }
+        .form-group label { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        .form-group input { background: #111; border: 1px solid #333; padding: 15px; border-radius: 10px; color: white; outline: none; transition: 0.3s; font-size: 1rem; box-sizing: border-box; }
+        .submit-btn { background: var(--gold); color: black; border: none; padding: 16px; border-radius: 10px; font-weight: 800; cursor: pointer; margin-top: 10px; transition: 0.3s; text-transform: uppercase; letter-spacing: 2px; }
+        .msg {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1rem;
+            text-align: center;
+            display: none;
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+        .msg-error { background: rgba(255, 0, 0, 0.1); color: #ff4d4d; border: 1px solid #ff4d4d; }
+        .msg-success { background: rgba(0, 255, 0, 0.1); color: #4dff4d; border: 1px solid #4dff4d; }
+    </style>
+</head>
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="logo-box" style="text-align: center; margin-bottom: 30px;">
+            <span style="font-size: 2.5rem; font-weight: 900; background: linear-gradient(135deg, var(--gold-light), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">WWM</span>
+        </div>
+
+        <!-- Окно сообщений теперь точно на всю ширину и по центру -->
+        <div id="auth-msg" class="msg"></div>
+
+        <div class="auth-tabs">
+            <button class="tab-btn active" onclick="switchTab('login')">ВХОД</button>
+            <button class="tab-btn" onclick="switchTab('register')">РЕГИСТРАЦИЯ</button>
+        </div>
+        <form id="login-form" class="auth-form active">
+            <div class="form-group"><label>Логин или Email</label><input type="text" id="login-val" required></div>
+            <div class="form-group"><label>Пароль</label><input type="password" id="login-pass" required></div>
+            <button type="submit" class="submit-btn">Авторизоваться</button>
+        </form>
+        <form id="register-form" class="auth-form">
+            <div class="form-group"><label>Логин</label><input type="text" id="reg-user" required></div>
+            <div class="form-group"><label>Email</label><input type="email" id="reg-email" required></div>
+            <div class="form-group"><label>Пароль</label><input type="password" id="reg-pass" required></div>
+            <button type="submit" class="submit-btn">Создать аккаунт</button>
+        </form>
+        <a href="/" style="display: block; text-align: center; margin-top: 30px; color: var(--text-muted); text-decoration: none;">← На главную</a>
+    </div>
+    <script>
+        function switchTab(type) {
+            const tabs = document.querySelectorAll('.tab-btn');
+            const forms = document.querySelectorAll('.auth-form');
+            tabs.forEach(t => t.classList.remove('active'));
+            forms.forEach(f => f.classList.remove('active'));
+            if (type === 'login') { tabs[0].classList.add('active'); document.getElementById('login-form').classList.add('active'); }
+            else { tabs[1].classList.add('active'); document.getElementById('register-form').classList.add('active'); }
+        }
+        function showMsg(text, type) {
+            const el = document.getElementById('auth-msg');
+            el.textContent = text;
+            el.className = 'msg ' + (type === 'error' ? 'msg-error' : 'msg-success');
+            el.style.display = 'block';
+        }
+        document.getElementById('register-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const res = await fetch('/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    username: document.getElementById('reg-user').value,
+                    email: document.getElementById('reg-email').value,
+                    password: document.getElementById('reg-pass').value
+                })
+            });
+            const data = await res.json();
+            if (data.success) { showMsg('Успешная регистрация!', 'success'); setTimeout(() => switchTab('login'), 1000); }
+            else { showMsg('Ошибка регистрации!', 'error'); }
+        };
+        document.getElementById('login-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const res = await fetch('/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    login: document.getElementById('login-val').value,
+                    password: document.getElementById('login-pass').value
+                })
+            });
+            const data = await res.json();
+            if (data.success) { showMsg('Вход выполнен!', 'success'); setTimeout(() => window.location.href = '/', 1000); }
+            else { showMsg('Неверный логин или пароль!', 'error'); }
+        };
+    </script>
+</body>
+</html>

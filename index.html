@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WWM-place | Modern Digital Hub</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <header>
+            <div class="logo-container">
+                <a href="/" style="text-decoration: none;"><div class="logo-text">WWM</div></a>
+                <div class="shop-title">WWM-place</div>
+            </div>
+
+            <div class="header-actions">
+                <div class="search-container">
+                    <input type="text" id="header-search" placeholder="Поиск цифровых товаров..." autocomplete="off">
+                    <div id="header-suggestions" class="suggestions-list"></div>
+                    <button class="search-submit"><i class="fas fa-search"></i></button>
+                </div>
+
+                <nav class="user-nav">
+                    <a href="/favorites" class="nav-item"><i class="far fa-heart" id="header-fav-icon"></i></a>
+                    <a href="#" class="nav-item"><i class="fas fa-shopping-bag"></i></a>
+
+                    {% if user %}
+                        <a href="/profile" class="btn-login"><i class="fas fa-user-circle"></i> {{ user }}</a>
+                        <span class="user-balance">{{ "%.2f"|format(user_balance) }} ₸</span>
+                    {% else %}
+                        <a href="/auth" class="btn-login">ВОЙТИ</a>
+                    {% endif %}
+                </nav>
+            </div>
+        </header>
+
+        <main class="container">
+            <div class="promo-container">
+                <img src="/images/logo.png" alt="Logo" class="promo-logo">
+                <div class="promo-text">
+                    <strong>WWM-place</strong> — Твой Ключ к Миру Гейминга. Лицензии, Аккаунты, Услуги.<br>
+                    Все для CS2, Minecraft, Steam. Проверено & Доступно.
+                </div>
+            </div>
+
+            <div class="grid-container">
+                <div class="central-hub">
+                    <div class="hub-circle"></div>
+                    <div class="hub-icon"><i class="fas fa-crown"></i></div>
+                </div>
+
+                <div class="showcase-grid">
+                    <!-- STEAM (ID 2) -->
+                    <a href="/listings/2" class="category-card">
+                        <div class="card-title">ЛИЦЕНЗИИ STEAM</div>
+                        <div class="card-desc">Ключи активации, пополнение баланса и подарочные карты.</div>
+                        <span class="btn-action">КУПИТЬ СЕЙЧАС</span>
+                        <div class="visual-placeholder"><i class="fab fa-steam steam-icon-large"></i></div>
+                    </a>
+
+                    <!-- MINECRAFT (ID 1) -->
+                    <a href="/listings/1" class="category-card">
+                        <div class="card-title">MINECRAFT</div>
+                        <div class="card-desc">Аккаунты с полным доступом, ключи и внутриигровая валюта.</div>
+                        <span class="btn-action">КУПИТЬ СЕЙЧАС</span>
+                        <div class="visual-placeholder mine-icons">
+                            <img src="/images/crp.png" class="cat-img">
+                            <img src="/images/tl.png" class="cat-img">
+                            <img src="/images/kirka.png" class="cat-img">
+                        </div>
+                    </a>
+
+                    <!-- CS2 (ID 3) -->
+                    <a href="/listings/3" class="category-card">
+                        <div class="card-title">СКИНЫ CS2</div>
+                        <div class="card-desc">Редкие ножи, перчатки и кейсы по самым выгодным ценам.</div>
+                        <span class="btn-action">КУПИТЬ СЕЙЧАС</span>
+                        <div class="visual-placeholder cs-icons">
+                            <img src="/images/cs.png" class="cat-img">
+                            <img src="/images/kerambo.png" class="cat-img">
+                            <img src="/images/ak.png" class="cat-img">
+                        </div>
+                    </a>
+
+                    <!-- GAMER SERVICES (ID 4) -->
+                    <a href="/listings/4" class="category-card">
+                        <div class="card-title">ИГРОВЫЕ УСЛУГИ</div>
+                        <div class="card-desc">Прокачка аккаунтов, обучение и помощь в прохождении.</div>
+                        <span class="btn-action">ЗАКАЗАТЬ</span>
+                        <div class="visual-placeholder service-icons">
+                            <i class="fas fa-gamepad gamepad-floating"></i>
+                            <i class="fas fa-headphones headphones-floating"></i>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <section class="recent-listings">
+                <h2 class="section-title">ПОСЛЕДНИЕ ОБЪЯВЛЕНИЯ</h2>
+                <div class="listings-grid">
+                    {% if recent_products %}
+                        {% for item in recent_products %}
+                        <div class="ad-card" onclick="location.href='/product/{{ item.id }}'">
+                            <div class="ad-image-container" style="height: 160px; background: #111; position: relative; overflow: hidden; border-radius: 8px 8px 0 0;">
+                                {% if item.image %}
+                                    <img src="/images/uploads/{{ item.image }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                {% else %}
+                                    <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #222; font-size: 3rem;">
+                                        <i class="fas fa-gamepad"></i>
+                                    </div>
+                                {% endif %}
+                                <button class="fav-btn {% if item.is_fav > 0 %}active{% endif %}" onclick="event.stopPropagation(); toggleFav({{ item.id }}, this)">
+                                    <i class="fa{% if item.is_fav > 0 %}s{% else %}r{% endif %} fa-heart"></i>
+                                </button>
+                            </div>
+                            <div class="ad-info" style="padding: 15px;">
+                                <div class="ad-price" style="font-size: 1.4rem; color: var(--gold); font-weight: 800;">{{ item.price }} ₸</div>
+                                <div class="ad-title" style="margin: 10px 0; font-size: 1rem; color: #fff; height: 40px; overflow: hidden;">{{ item.title }}</div>
+                                <div class="ad-seller" style="font-size: 0.8rem; color: var(--text-muted); border-top: 1px solid #222; padding-top: 10px;">
+                                    <i class="fas fa-user-check" style="color: var(--gold);"></i> {{ item.username }}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p style="grid-column: 1/-1; text-align: center; color: #444; padding: 40px;">Здесь пока пусто.</p>
+                    {% endif %}
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-brand">
+                        <div class="logo-text" style="font-size: 2rem;">WWM</div>
+                        <p>Ваша надежная площадка для обмена цифровыми ценностями. Мы создаем безопасную среду для геймеров по всему миру.</p>
+                    </div>
+                    <div class="footer-links">
+                        <h4>Навигация</h4>
+                        <ul>
+                            <li><a href="/">Главная</a></li>
+                            <li><a href="/profile">Мой профиль</a></li>
+                            <li><a href="/favorites">Избранное</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-links">
+                        <h4>Поддержка</h4>
+                        <ul>
+                            <li><a href="#">FAQ</a></li>
+                            <li><a href="#">Правила</a></li>
+                            <li><a href="#">Чат с техподдержкой</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-payments">
+                        <h4>Мы принимаем</h4>
+                        <div class="payment-icons">
+                            <i class="fab fa-bitcoin" title="Bitcoin"></i>
+                            <i class="fab fa-ethereum" title="Ethereum"></i>
+                            <i class="fab fa-cc-visa" title="Visa"></i>
+                            <i class="fab fa-cc-mastercard" title="Mastercard"></i>
+                            <i class="fas fa-university" title="Kaspi Bank"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2026 WWM-place. Все права защищены.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-discord"></i></a>
+                        <a href="#"><i class="fab fa-telegram"></i></a>
+                        <a href="#"><i class="fab fa-vk"></i></a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        async function toggleFav(pid, btn) {
+            const res = await fetch('/toggle_favorite', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({product_id: pid})
+            });
+            const data = await res.json();
+            if (data.success) {
+                const icon = btn.querySelector('i');
+                if (data.status === 'added') {
+                    btn.classList.add('active'); icon.classList.replace('far', 'fas');
+                } else {
+                    btn.classList.remove('active'); icon.classList.replace('fas', 'far');
+                }
+            } else { window.location.href = '/auth'; }
+        }
+
+        const searchInput = document.getElementById('header-search');
+        const suggestionsBox = document.getElementById('header-suggestions');
+        searchInput.addEventListener('input', async (e) => {
+            const val = e.target.value;
+            if (val.length < 1) { suggestionsBox.style.display = 'none'; return; }
+            const res = await fetch(`/search_api?q=${val}`);
+            const games = await res.json();
+            suggestionsBox.innerHTML = '';
+            if (games.length > 0) {
+                games.forEach(game => {
+                    const div = document.createElement('div');
+                    div.style.padding = '12px'; div.style.cursor = 'pointer'; div.style.borderBottom = '1px solid #333';
+                    div.textContent = game.name;
+                    div.onclick = () => { window.location.href = `/listings/${game.id}`; };
+                    suggestionsBox.appendChild(div);
+                });
+                suggestionsBox.style.display = 'block';
+            }
+        });
+        document.addEventListener('click', (e) => { if(!searchInput.contains(e.target)) suggestionsBox.style.display = 'none'; });
+    </script>
+</body>
+</html>

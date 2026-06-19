@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Избранное | WWM-place</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <header>
+            <div class="logo-container">
+                <a href="/" style="text-decoration: none;"><div class="logo-text">WWM</div></a>
+                <div class="shop-title">WWM-place</div>
+            </div>
+            <nav class="user-nav">
+                <a href="/" class="nav-item"><i class="fas fa-home"></i></a>
+                {% if user %}<a href="/profile" class="btn-login">{{ user }}</a>{% endif %}
+            </nav>
+        </header>
+
+        <main class="container">
+            <h2 class="section-title" style="margin-top: 40px;">Ваше Избранное</h2>
+            <div class="listings-grid">
+                {% if items %}
+                    {% for item in items %}
+                    <div class="ad-card" onclick="location.href='/product/{{ item[0] }}'">
+                        <div style="height: 160px; background: #111; position: relative;">
+                            {% if item[9] %}<img src="/images/uploads/{{ item[9] }}" style="width: 100%; height: 100%; object-fit: cover;">{% endif %}
+                            <button onclick="event.stopPropagation(); toggleFav({{ item[0] }}, this)" class="fav-btn active"><i class="fas fa-heart"></i></button>
+                        </div>
+                        <div style="padding: 15px;">
+                            <div class="ad-price">{{ item[3] }} ₽</div>
+                            <div class="ad-title">{{ item[2] }}</div>
+                            <div class="ad-seller"><i class="fas fa-user"></i> {{ item[10] }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="text-align: center; color: #444; grid-column: 1/-1; padding: 100px 0;">У вас пока нет избранных товаров.</p>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+    <script>
+        async function toggleFav(pid, btn) {
+            await fetch('/toggle_favorite', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({product_id: pid})
+            });
+            location.reload();
+        }
+    </script>
+</body>
+</html>

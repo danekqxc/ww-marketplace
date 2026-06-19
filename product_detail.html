@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ item.title }} | WWM-place</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <header>
+            <div class="logo-container">
+                <a href="/" style="text-decoration: none;"><div class="logo-text">WWM</div></a>
+                <div class="shop-title">WWM-place</div>
+            </div>
+            <nav class="user-nav">
+                <a href="/" class="nav-item"><i class="fas fa-home"></i></a>
+                {% if user %}
+                    <a href="/profile" class="btn-login"><i class="fas fa-user-circle"></i> {{ user }}</a>
+                    <span class="user-balance">{{ "%.2f"|format(user_balance) }} ₽</span>
+                {% else %}
+                    <a href="/auth" class="btn-login">ВОЙТИ</a>
+                {% endif %}
+            </nav>
+        </header>
+
+        <main class="container">
+            <div class="product-page-layout" style="display: grid; grid-template-columns: 1fr 400px; gap: 40px; margin-top: 40px;">
+                <div class="product-main">
+                    <div class="product-gallery" style="background: #0a0a0a; border-radius: 15px; padding: 20px; border: 1px solid #222;">
+                        {% if item.image %}
+                            <img src="/images/uploads/{{ item.image }}" style="width: 100%; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                        {% else %}
+                            <div style="height: 400px; display: flex; align-items: center; justify-content: center; font-size: 5rem; color: #111;">
+                                <i class="fas fa-gamepad"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="product-desc" style="margin-top: 30px; background: #0a0a0a; padding: 30px; border-radius: 15px; border: 1px solid #111;">
+                        <h2 style="color: var(--gold); margin-bottom: 20px; border-bottom: 1px solid #222; padding-bottom: 10px;">Описание товара</h2>
+                        <div style="color: #ccc; line-height: 1.8; font-size: 1.1rem;">{{ item.description }}</div>
+                    </div>
+
+                    {% if item.user_id == session['user_id'] %}
+                    <div class="product-interactions" style="margin-top: 40px; background: #0a0a0a; padding: 30px; border-radius: 15px; border: 1px solid var(--gold);">
+                        <h2 style="color: var(--gold); margin-bottom: 20px;"><i class="fas fa-comments"></i> Сообщения по товару</h2>
+                        <p style="color: var(--text-muted); margin-bottom: 20px;">Ниже представлены пользователи, которые писали вам по поводу этого товара.</p>
+                        <div id="interacted-users" style="display: flex; flex-direction: column; gap: 10px;">
+                            <!-- Users will be loaded here via JS if not provided by backend -->
+                            <div style="color: #444; text-align: center; padding: 20px;">Загрузка списка пользователей...</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="product-sidebar">
+                    <div class="purchase-box" style="background: #0a0a0a; border-radius: 15px; padding: 35px; border: 1px solid var(--border-gold); position: sticky; top: 40px; box-shadow: 0 15px 40px rgba(0,0,0,0.6);">
+                        <h1 style="font-size: 2rem; margin-bottom: 20px; color: #fff;">{{ item.title }}</h1>
+                        <div class="price-tag" style="font-size: 2.8rem; color: var(--gold); font-weight: 800; margin-bottom: 30px;">{{ item.price }} ₽</div>
+
+                        {% if item.user_id == session['user_id'] %}
+                            <div style="background: #111; padding: 20px; border-radius: 10px; text-align: center; border: 1px solid #222;">
+                                <i class="fas fa-info-circle" style="color: var(--gold); font-size: 1.5rem; margin-bottom: 10px;"></i>
+                                <div style="font-weight: bold; color: var(--gold);">ЭТО ВАШ ТОВАР</div>
+                                <div style="font-size: 0.9rem; color: var(--text-muted); margin-top: 5px;">Вы можете просматривать активные диалоги ниже.</div>
+                            </div>
+                        {% else %}
+                            <a href="/purchase/{{ item.id }}" class="btn-gold" style="display: block; text-align: center; font-size: 1.2rem; width: 100%; box-sizing: border-box;">
+                                ПЕРЕЙТИ К ПОКУПКЕ
+                            </a>
+                        {% endif %}
+
+                        <div class="seller-info" style="margin-top: 40px; border-top: 1px solid #222; padding-top: 25px; display: flex; align-items: center; gap: 15px;">
+                            <img src="/images/avatars/{{ item.avatar }}" style="width: 55px; height: 55px; border-radius: 50%; border: 2px solid var(--gold); object-fit: cover;">
+                            <div>
+                                <div style="color: var(--text-muted); font-size: 0.85rem;">Продавец</div>
+                                <a href="/reviews/{{ item.username }}" style="font-weight: bold; font-size: 1.2rem; text-decoration: none; color: #fff;">
+                                    {{ item.username }}
+                                    {% if rating > 0 %}
+                                        <span style="margin-left: 10px; color: var(--gold); font-size: 1rem;"><i class="fas fa-star"></i> {{ rating }} ({{ review_count }})</span>
+                                    {% endif %}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Chat Window -->
+            <div id="seller-chat-modal" style="display: none; position: fixed; bottom: 30px; right: 30px; width: 450px; height: 600px; background: #050505; border: 2px solid var(--gold); border-radius: 15px; z-index: 1000; flex-direction: column; overflow: hidden;">
+                <div class="chat-header" style="background: #111; padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-circle" style="color: #4caf50; font-size: 0.7rem;"></i>
+                        <span id="chat-with-name" style="font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Чат</span>
+                    </div>
+                    <button onclick="closeChat()" style="background: none; border: none; color: #666; cursor: pointer; font-size: 1.2rem;"><i class="fas fa-times"></i></button>
+                </div>
+                <div id="seller-chat-messages" class="chat-messages" style="flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; background: #050505;"></div>
+                <div class="chat-input-area" style="background: #0a0a0a; border-top: 1px solid #222;">
+                    <input type="text" id="seller-chat-input" placeholder="Введите ответ...">
+                    <button id="seller-send-btn"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let activeBuyerId = null;
+        let chatInterval = null;
+
+        // Fetch users who interacted with this product
+        async function loadInteractedUsers() {
+            if ({{ item.user_id }} != {{ session['user_id'] if session['user_id'] else 0 }}) return;
+
+            const res = await fetch(`/get_interacted_users/{{ item.id }}`);
+            const users = await res.json();
+            const container = document.getElementById('interacted-users');
+
+            if (users.length === 0) {
+                container.innerHTML = '<div style="color: #444; text-align: center; padding: 20px;">Пока никто не писал по этому товару.</div>';
+                return;
+            }
+
+            container.innerHTML = users.map(u => `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px; background: #111; border-radius: 10px; border: 1px solid #222; transition: 0.3s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='#222'">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="width: 10px; height: 10px; border-radius: 50%; background: var(--gold);"></div>
+                        <span style="font-weight: bold; font-size: 1.1rem;">${u.username}</span>
+                    </div>
+                    <button class="btn-outline" onclick="openChatWith(${u.id}, '${u.username}')" style="padding: 10px 20px; font-size: 0.9rem;">
+                        ОТКРЫТЬ ДИАЛОГ
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function openChatWith(buyerId, buyerName) {
+            activeBuyerId = buyerId;
+            document.getElementById('chat-with-name').textContent = buyerName;
+            document.getElementById('seller-chat-modal').style.display = 'flex';
+            loadSellerMessages();
+            if (chatInterval) clearInterval(chatInterval);
+            chatInterval = setInterval(loadSellerMessages, 3000);
+        }
+
+        function closeChat() {
+            document.getElementById('seller-chat-modal').style.display = 'none';
+            if (chatInterval) clearInterval(chatInterval);
+        }
+
+        async function loadSellerMessages() {
+            if (!activeBuyerId) return;
+            const res = await fetch(`/get_messages/{{ item.id }}?other_id=${activeBuyerId}`);
+            const msgs = await res.json();
+            const container = document.getElementById('seller-chat-messages');
+            const currentUserId = {{ session['user_id'] if session['user_id'] else 0 }};
+
+            container.innerHTML = msgs.map(m => `
+                <div class="msg ${m.sender_id == currentUserId ? 'own' : 'other'}">
+                    <div class="msg-sender">${m.sender_name}</div>
+                    <div>${m.message}</div>
+                </div>
+            `).join('');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        document.getElementById('seller-send-btn').onclick = async () => {
+            const input = document.getElementById('seller-chat-input');
+            const msg = input.value.trim();
+            if (!msg || !activeBuyerId) return;
+            await fetch('/send_message', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({product_id: {{ item.id }}, message: msg, receiver_id: activeBuyerId})
+            });
+            input.value = '';
+            loadSellerMessages();
+        };
+
+        document.getElementById('seller-chat-input').onkeypress = (e) => { if(e.key === 'Enter') document.getElementById('seller-send-btn').click(); };
+
+        loadInteractedUsers();
+    </script>
+</body>
+</html>

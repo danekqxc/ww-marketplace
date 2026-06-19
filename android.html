@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WWM Android Edition</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --android-bg: #000000;
+            --android-surface: #121212;
+            --android-primary: #ffb300;
+            --android-on-surface: #e1e1e1;
+            --android-accent: #2c2c2c;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            background: var(--android-bg);
+            color: var(--android-on-surface);
+            font-family: 'Roboto', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            height: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .status-icons i { margin-left: 5px; font-size: 12px; }
+
+        /* Header */
+        header {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo { font-size: 24px; font-weight: 900; color: var(--android-primary); letter-spacing: 1px; }
+        .user-avatar { width: 35px; height: 35px; border-radius: 50%; border: 1px solid var(--android-primary); }
+
+        /* Search Bar Android Style */
+        .search-wrapper {
+            padding: 0 15px 20px;
+        }
+        .search-bar {
+            background: var(--android-accent);
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            gap: 15px;
+        }
+        .search-bar input {
+            background: none;
+            border: none;
+            color: white;
+            flex: 1;
+            font-size: 16px;
+            outline: none;
+        }
+        .search-bar i { color: #888; }
+
+        /* Categories Scroll */
+        .categories-chips {
+            display: flex;
+            overflow-x: auto;
+            padding: 0 15px 20px;
+            gap: 10px;
+            scrollbar-width: none;
+        }
+        .chip {
+            background: var(--android-accent);
+            padding: 8px 18px;
+            border-radius: 20px;
+            white-space: nowrap;
+            font-size: 14px;
+            border: 1px solid #333;
+        }
+        .chip.active { background: var(--android-primary); color: black; font-weight: bold; }
+
+        /* Main Content */
+        .content { padding: 0 15px 100px; }
+
+        .section-label {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding-left: 5px;
+        }
+
+        /* Android Cards */
+        .android-card {
+            background: var(--android-surface);
+            border-radius: 24px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            border: 1px solid #222;
+        }
+        .card-image {
+            height: 150px;
+            background: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: var(--android-primary);
+            position: relative;
+        }
+        .card-body { padding: 20px; }
+        .card-title { font-size: 20px; font-weight: bold; margin-bottom: 8px; }
+        .card-text { font-size: 14px; color: #999; margin-bottom: 15px; line-height: 1.4; }
+        .card-footer { display: flex; justify-content: space-between; align-items: center; }
+        .price { color: var(--android-primary); font-weight: 900; font-size: 18px; }
+        .btn-fab {
+            background: var(--android-primary);
+            color: black;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        /* Bottom Nav */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: #080808;
+            border-top: 1px solid #222;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            color: #888;
+            font-size: 10px;
+            text-decoration: none;
+        }
+        .nav-item i { font-size: 20px; }
+        .nav-item.active { color: var(--android-primary); }
+        .nav-item.active .icon-bg {
+            background: rgba(255, 179, 0, 0.2);
+            padding: 4px 15px;
+            border-radius: 15px;
+            margin-bottom: 2px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Android Top Bar -->
+    <div class="status-bar">
+        <div class="time">12:45</div>
+        <div class="status-icons">
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-battery-three-quarters"></i>
+        </div>
+    </div>
+
+    <header>
+        <div class="logo">WWM</div>
+        <img src="/images/avatars/default_avatar.png" class="user-avatar" alt="User">
+    </header>
+
+    <div class="search-wrapper">
+        <div class="search-bar">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Поиск в WWM-place">
+        </div>
+    </div>
+
+    <div class="categories-chips">
+        <div class="chip active">Все</div>
+        <div class="chip">Steam</div>
+        <div class="chip">Minecraft</div>
+        <div class="chip">CS2</div>
+        <div class="chip">Услуги</div>
+        <div class="chip">Brawl Stars</div>
+    </div>
+
+    <div class="content">
+        <div class="section-label">Рекомендуемое</div>
+
+        <!-- STEAM -->
+        <div class="android-card">
+            <div class="card-image">
+                <i class="fab fa-steam"></i>
+            </div>
+            <div class="card-body">
+                <div class="card-title">Steam License</div>
+                <div class="card-text">Ключи активации и пополнение баланса в один клик.</div>
+                <div class="card-footer">
+                    <div class="price">от 500 ₽</div>
+                    <div class="btn-fab"><i class="fas fa-arrow-right"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MINECRAFT -->
+        <div class="android-card">
+            <div class="card-image" style="background: linear-gradient(45deg, #1a3a1a, #000);">
+                <i class="fas fa-cube"></i>
+            </div>
+            <div class="card-body">
+                <div class="card-title">Minecraft</div>
+                <div class="card-text">Аккаунты с полным доступом и лицензионные ключи.</div>
+                <div class="card-footer">
+                    <div class="price">от 1200 ₽</div>
+                    <div class="btn-fab"><i class="fas fa-arrow-right"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CS2 -->
+        <div class="android-card">
+            <div class="card-image" style="background: linear-gradient(45deg, #3a2a1a, #000);">
+                <i class="fas fa-crosshairs"></i>
+            </div>
+            <div class="card-body">
+                <div class="card-title">Skins CS2</div>
+                <div class="card-text">Ножи, перчатки и редкие скины с мгновенной передачей.</div>
+                <div class="card-footer">
+                    <div class="price">от 100 ₽</div>
+                    <div class="btn-fab"><i class="fas fa-arrow-right"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <a href="#" class="nav-item active">
+            <div class="icon-bg"><i class="fas fa-home"></i></div>
+            Главная
+        </a>
+        <a href="#" class="nav-item">
+            <i class="fas fa-search"></i>
+            Поиск
+        </a>
+        <a href="#" class="nav-item">
+            <i class="far fa-heart"></i>
+            Избранное
+        </a>
+        <a href="#" class="nav-item">
+            <i class="fas fa-shopping-bag"></i>
+            Заказы
+        </a>
+        <a href="#" class="nav-item">
+            <i class="fas fa-user-circle"></i>
+            Профиль
+        </a>
+    </div>
+
+</body>
+</html>

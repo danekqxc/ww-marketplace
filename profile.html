@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль {{ user.username }} | WWM-place</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .profile-tab { padding: 15px 25px; cursor: pointer; color: var(--text-muted); font-weight: bold; transition: 0.3s; border-bottom: 2px solid transparent; }
+        .profile-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+        .tab-content { display: none; margin-top: 30px; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <header>
+            <div class="logo-container">
+                <a href="/" style="text-decoration: none;"><div class="logo-text">WWM</div></a>
+                <div class="shop-title">WWM-place</div>
+            </div>
+            <nav class="user-nav">
+                <a href="/" class="nav-item"><i class="fas fa-home"></i></a>
+                <a href="/logout" class="nav-item" title="Выйти"><i class="fas fa-sign-out-alt"></i></a>
+            </nav>
+        </header>
+
+        <main class="container">
+            <div class="profile-header" style="display: flex; align-items: center; gap: 30px; margin-top: 50px; background: #0a0a0a; padding: 40px; border-radius: 20px; border: 1px solid var(--border-gold);">
+                <div class="avatar-container" style="position: relative; width: 120px; height: 120px;">
+                    <img src="/images/avatars/{{ user.avatar }}" id="avatar-preview" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid var(--gold);">
+                    <label for="avatar-input" style="position: absolute; bottom: 0; right: 0; background: var(--gold); width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: black;">
+                        <i class="fas fa-camera"></i>
+                    </label>
+                    <input type="file" id="avatar-input" style="display: none;" accept="image/*">
+                </div>
+                <div>
+                    <h1 style="margin: 0; font-size: 2.2rem;">{{ user.username }}</h1>
+                    <div style="color: var(--gold); font-size: 1.3rem; font-weight: bold; margin-top: 5px;">{{ "%.2f"|format(user.balance) }} ₸</div>
+                    <div style="color: var(--text-muted); margin-top: 10px;">{{ user.email }}</div>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+                        <div style="color: var(--gold); font-size: 1.2rem; font-weight: bold;">
+                            <i class="fas fa-star"></i> {{ rating }}
+                        </div>
+                        <div style="color: var(--text-muted);">({{ review_count }} отзывов)</div>
+                        <a href="/reviews/{{ user.username }}" style="color: var(--gold); text-decoration: none; font-size: 0.9rem; margin-left: 10px;">Посмотреть все отзывы</a>
+                    </div>
+                </div>
+                <button class="btn-gold" onclick="document.getElementById('add-modal').style.display='flex'" style="margin-left: auto;">
+                    <i class="fas fa-plus"></i> ВЫСТАВИТЬ ТОВАР
+                </button>
+            </div>
+
+            <div class="profile-tabs-container" style="margin-top: 40px;">
+                <div style="display: flex; border-bottom: 1px solid #222; overflow-x: auto;">
+                    <div class="profile-tab active" onclick="showTab('my-products', this)">МОИ ТОВАРЫ</div>
+                    <div class="profile-tab" onclick="showTab('active-deals', this)">АКТИВНЫЕ СДЕЛКИ</div>
+                    <div class="profile-tab" onclick="showTab('history', this)">ИСТОРИЯ ПОКУПОК</div>
+                    <div class="profile-tab" onclick="showTab('sales-history', this)">МОИ ПРОДАЖИ</div>
+                </div>
+
+                <!-- МОИ ТОВАРЫ (Активные объявления) -->
+                <div id="my-products" class="tab-content active">
+                    <div class="listings-grid">
+                        {% for p in products if p.status == 'active' %}
+                        <div class="ad-card" onclick="location.href='/product/{{ p.id }}'">
+                            <div style="height: 150px; background: #111;">
+                                {% if p.image %}<img src="/images/uploads/{{ p.image }}" style="width: 100%; height: 100%; object-fit: cover;">{% endif %}
+                            </div>
+                            <div style="padding: 15px;">
+                                <div class="ad-price">{{ p.price }} ₸</div>
+                                <div class="ad-title">{{ p.title }}</div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div style="display: flex; justify-content: center; align-items: center; min-height: 200px; width: 100%; grid-column: 1 / -1;">
+                            <div style="text-align: center; color: #444; font-size: 1.1rem;">У вас нет активных объявлений.</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- АКТИВНЫЕ СДЕЛКИ (Я покупатель) -->
+                <div id="active-deals" class="tab-content">
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        {% for deal in active_deals %}
+                        <div style="background: #0a0a0a; border: 1px solid var(--border-gold); padding: 25px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-size: 1.2rem; font-weight: bold; color: var(--gold);">{{ deal.title }}</div>
+                                <div style="color: var(--text-muted); margin-top: 5px;">Продавец: {{ deal.seller_name }} | Сумма: {{ deal.price }} ₸</div>
+                                {% if deal.order_status == 'active' %}
+                                    <div style="margin-top: 10px; font-size: 0.85rem; color: #4caf50;"><i class="fas fa-lock"></i> Средства заморожены</div>
+                                {% else %}
+                                    <div style="margin-top: 10px; font-size: 0.85rem; color: var(--gold);"><i class="fas fa-comment-dots"></i> Интересуюсь товаром</div>
+                                {% endif %}
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <a href="/purchase/{{ deal.product_id }}?order_id={{ deal.order_id }}" class="btn-outline" style="padding: 10px 20px;">ПЕРЕЙТИ В ЧАТ</a>
+                                {% if deal.order_status == 'active' %}
+                                    <button class="btn-gold" onclick="confirmDeal({{ deal.order_id }})" style="padding: 10px 20px; font-size: 0.9rem;">ЗАВЕРШИТЬ СДЕЛКУ</button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% else %}
+                        <div style="display: flex; justify-content: center; align-items: center; min-height: 200px; width: 100%;">
+                            <div style="text-align: center; color: #444; font-size: 1.1rem;">Нет активных диалогов или сделок.</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- ИСТОРИЯ ПОКУПОК (Я покупатель) -->
+                <div id="history" class="tab-content">
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        {% for order in completed_orders %}
+                        <div style="background: #0a0a0a; border: 1px solid #222; padding: 25px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-weight: bold; font-size: 1.1rem;">{{ order.title }}</div>
+                                <div style="color: var(--text-muted); font-size: 0.9rem; margin-top: 5px;">Продавец: {{ order.seller_name }}</div>
+                                <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 5px;">Дата: {{ order.timestamp }}</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="color: var(--gold); font-weight: bold;">{{ order.price }} ₸</div>
+                                <div style="color: #4caf50; font-size: 0.8rem; margin-top: 5px;"><i class="fas fa-check"></i> Завершено</div>
+                                {% if not order.review_id %}
+                                    <a href="/purchase/{{ order.product_id }}?order_id={{ order.id }}" class="btn-outline" style="padding: 5px 10px; font-size: 0.8rem; margin-top: 10px;">Оставить отзыв</a>
+                                {% else %}
+                                    <div style="color: var(--gold); font-size: 0.9rem; margin-top: 5px;">
+                                        Ваша оценка: {% for i in range(order.rating) %}<i class="fas fa-star"></i>{% endfor %}
+                                    </div>
+                                    <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 5px;">"{{ order.comment }}"</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% else %}
+                        <div style="display: flex; justify-content: center; align-items: center; min-height: 200px; width: 100%;">
+                            <div style="text-align: center; color: #444; font-size: 1.1rem;">Вы еще ничего не купили.</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- МОИ ПРОДАЖИ (Я продавец, сделка завершена) -->
+                <div id="sales-history" class="tab-content">
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        {% for sale in completed_sales %}
+                        <div style="background: #0a0a0a; border: 1px solid #222; padding: 25px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-weight: bold; font-size: 1.1rem;">{{ sale.title }}</div>
+                                <div style="color: var(--text-muted); font-size: 0.9rem; margin-top: 5px;">Покупатель: {{ sale.buyer_name }}</div>
+                                <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 5px;">Дата: {{ sale.timestamp }}</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="color: #4caf50; font-weight: bold;">+ {{ sale.price }} ₸</div>
+                                <div style="color: #4caf50; font-size: 0.8rem; margin-top: 5px;"><i class="fas fa-hand-holding-usd"></i> Выплачено</div>
+                                {% if sale.rating %}
+                                    <div style="color: var(--gold); font-size: 0.9rem; margin-top: 5px;">
+                                        Оценка покупателя: {% for i in range(sale.rating) %}<i class="fas fa-star"></i>{% endfor %}
+                                    </div>
+                                    <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 5px;">"{{ sale.comment }}"</div>
+                                {% else %}
+                                    <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 5px;">Отзыв не оставлен</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% else %}
+                        <div style="display: flex; justify-content: center; align-items: center; min-height: 200px; width: 100%;">
+                            <div style="text-align: center; color: #444; font-size: 1.1rem;">У вас пока нет завершенных продаж.</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Модалка добавления -->
+    <div id="add-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: #0a0a0a; padding: 40px; border-radius: 20px; border: 1px solid var(--gold); width: 500px;">
+            <h2 style="color: var(--gold); margin-bottom: 25px;">Новое объявление</h2>
+            <form id="add-form">
+                <input type="text" name="title" placeholder="Название товара" required style="width: 100%; padding: 12px; margin-bottom: 15px; background: #111; border: 1px solid #333; color: white; border-radius: 8px;">
+                <input type="number" name="price" placeholder="Цена (₸)" required style="width: 100%; padding: 12px; margin-bottom: 15px; background: #111; border: 1px solid #333; color: white; border-radius: 8px;">
+                <select name="game_id" style="width: 100%; padding: 12px; margin-bottom: 15px; background: #111; border: 1px solid #333; color: white; border-radius: 8px;">
+                    {% for id, name in GAMES_CATALOG.items() %}
+                        <option value="{{ id }}">{{ name }}</option>
+                    {% endfor %}
+                </select>
+                <textarea name="description" placeholder="Подробное описание..." style="width: 100%; padding: 12px; margin-bottom: 15px; background: #111; border: 1px solid #333; color: white; height: 100px; border-radius: 8px;"></textarea>
+                <input type="file" name="image" style="margin-bottom: 20px; color: #555;">
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" class="btn-gold" style="flex: 1;">ОПУБЛИКОВАТЬ</button>
+                    <button type="button" onclick="document.getElementById('add-modal').style.display='none'" class="btn-outline" style="flex: 1;">ОТМЕНА</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabId, btn) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.profile-tab').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        async function confirmDeal(orderId) {
+            if (!confirm('Вы подтверждаете выполнение всех условий сделки? Деньги будут переведены продавцу.')) return;
+            const res = await fetch('/confirm_order', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({order_id: orderId})
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert('Сделка успешно завершена!');
+                location.reload();
+            }
+        }
+
+        document.getElementById('avatar-input').onchange = async (e) => {
+            const formData = new FormData();
+            formData.append('avatar', e.target.files[0]);
+            await fetch('/upload_avatar', { method: 'POST', body: formData });
+            location.reload();
+        };
+
+        document.getElementById('add-form').onsubmit = async (e) => {
+            e.preventDefault();
+            await fetch('/add_product', { method: 'POST', body: new FormData(e.target) });
+            location.reload();
+        };
+    </script>
+</body>
+</html>
