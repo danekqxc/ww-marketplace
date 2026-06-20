@@ -50,7 +50,7 @@ WWM-place — WW(дабл-ю дабл-ю) M(market)place - биржа игров
 
 1. **Клонируй  репозиторий:**
    ```bash
-   git clone [https://github.com/danekqxc/ww-marketplace.git](https://github.com/danekqxc/ww-marketplace.git)
+   git clone https://github.com/danekqxc/ww-marketplace.git
    cd ww-marketplace
    ```
 
